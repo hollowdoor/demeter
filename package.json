@@ -1,0 +1,45 @@
+{
+  "name": "demeter",
+  "version": "1.0.0",
+  "description": "A test framework",
+  "main": "dist/bundle.js",
+  "scripts": {
+    "test-run": "node test/run_all.js",
+    "test": "npm run build && cd test && nyc node ./run.js",
+    "build": "ebam"
+  },
+  "ebam": {
+    "entry": "src/index.js",
+    "test": {
+      "src": "test/src.js",
+      "dest": "test/code.js"
+    }
+  },
+  "author": "Quentin Engles <hollowdoor99@gmail.com> (https://hollowdoor.github.io/)",
+  "license": "MIT",
+  "keywords": [
+    "test",
+    "browser",
+    "node",
+    "unit"
+  ],
+  "devDependencies": {
+    "glob": "^7.1.2",
+    "nyc": "^11.0.3"
+  },
+  "jsnext:main": "dist/bundle.es.js",
+  "module": "dist/bundle.es.js",
+  "dependencies": {
+    "clear": "0.0.1",
+    "deep-equal": "^1.0.1",
+    "delay": "^2.0.0",
+    "glob-promise": "^3.1.0",
+    "indent": "0.0.2",
+    "indent-string": "^3.2.0",
+    "is-promise": "^2.1.0",
+    "multistream": "^2.1.0",
+    "object-assign": "^4.1.1",
+    "string.prototype.padstart": "^3.0.0",
+    "tap-merge": "^0.3.1"
+  }
+}
