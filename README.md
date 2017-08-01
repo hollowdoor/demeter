@@ -6,7 +6,7 @@ demeter
 Install
 ------
 
-`npm install --save-dev clue-cat`
+`npm install --save-dev demeter`
 
 Import from this module
 -----------------
