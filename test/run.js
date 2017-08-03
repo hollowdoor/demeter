@@ -79,14 +79,12 @@ test()
     t.assert(false);
 })
 .test('.fail', t=>t.fail())
-
-.test('promise should fail', t=>Promise.resolve().then(v=>t.fail()))
 .test('# TODO thing', t=>{})
 .test('# PASS passing', t=>{})
-.reverse('.equal fail reversed', t=>{
+.reverse('.equal should fail', t=>{
     return test().test('', t=>t.equal(1, 2));
 })
-.reverse('rethrow should fail', t=>{
+.reverse('.fail should fail', t=>{
     return thorny().test('', t=>t.fail());
 })
 .reverse('promise should reject', t=>{
