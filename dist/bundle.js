@@ -5,7 +5,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var deepEqual = _interopDefault(require('deep-equal'));
-var indent = _interopDefault(require('indent-string'));
+var indentString = _interopDefault(require('indent-string'));
 
 var str = function (a) { return (
     typeof a === 'object'
@@ -196,25 +196,6 @@ RunControls.prototype.resolve = function resolve (callback, reverse){
     try{
         var value = callback(this.asserts());
 
-        if(typeof value === 'object'){
-            var run = value['resolve'];
-            console.log('value ',value);
-            console.log('run ',run);
-            if(typeof run === 'function'){
-                return value
-                .resolve(this)
-                .then(function (sub){
-                    //console.log('sub ',sub)
-                    if(sub.failed){
-                        var result = this$1.fail();
-                        result.subTest = sub;
-                        return result;
-                    }
-                    return this$1.pass();
-                });
-            }
-        }
-
         if(reverse){
             return Promise.resolve(value)
             .then(function (v){ return this$1.fail(v); })
@@ -283,41 +264,13 @@ var PrintControls = function PrintControls(ref){
             console.log('1..'+plan);
         }
 
-        /*if(/^#/.test(description)){
-            const createDirective = (failed, result) =>{
-                result.failed = failed;
-                result.passed = !failed;
-                result.value = new Error('');
-                return result;
-            };
-            if(/^#[ ]TODO/.test(t.description)){
-                t = createDirective(true, t);
-            }else if(/^#[ ]PASS/.test(t.description)){
-                t = createDirective(false, t);
-            }
-        }*/
-
-
-
         var message = description.length ? description : '';
         var str = '';
         if(passed){
             str = 'ok ' + count + ' - ' + message;
-            /*if(value && value.message){
-                if(/#[ ]rethrow[ ]test/.test(value.message)){
-                    str += indent(value.message, 2);
-                }
-            }*/
         }else if(failed){
-            //console.log('subTest ',subTest)
-            if(subTest){
-                console.log(subTest);
-                var errMessage = '\n\n  ' + subTest.description + '\n';
-                errMessage += subTest.value.message;
-                return 'not ok ' + count + ' - ' + message + ' ' +  indent(errMessage);
-            }
-            var errMessage$1 = value ? value.message : '';
-            str = 'not ok ' + count + ' - ' + message + ' ' + errMessage$1;
+            var errMessage = value ? value.message : '';
+            str = 'not ok ' + count + ' - ' + message + ' ' + errMessage;
         }
 
         if(count === plan){

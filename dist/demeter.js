@@ -326,25 +326,6 @@ RunControls.prototype.resolve = function resolve (callback, reverse){
     try{
         var value = callback(this.asserts());
 
-        if(typeof value === 'object'){
-            var run = value['resolve'];
-            console.log('value ',value);
-            console.log('run ',run);
-            if(typeof run === 'function'){
-                return value
-                .resolve(this)
-                .then(function (sub){
-                    //console.log('sub ',sub)
-                    if(sub.failed){
-                        var result = this$1.fail();
-                        result.subTest = sub;
-                        return result;
-                    }
-                    return this$1.pass();
-                });
-            }
-        }
-
         if(reverse){
             return Promise.resolve(value)
             .then(function (v){ return this$1.fail(v); })
@@ -387,32 +368,6 @@ var writeVersion = (function (){
     };
 })();
 
-var index$1 = function (str, count, opts) {
-	// Support older versions: use the third parameter as options.indent
-	// TODO: Remove the workaround in the next major version
-	var options = typeof opts === 'object' ? Object.assign({indent: ' '}, opts) : {indent: opts || ' '};
-	count = count === undefined ? 1 : count;
-
-	if (typeof str !== 'string') {
-		throw new TypeError(("Expected `input` to be a `string`, got `" + (typeof str) + "`"));
-	}
-
-	if (typeof count !== 'number') {
-		throw new TypeError(("Expected `count` to be a `number`, got `" + (typeof count) + "`"));
-	}
-
-	if (typeof options.indent !== 'string') {
-		throw new TypeError(("Expected `options.indent` to be a `string`, got `" + (typeof options.indent) + "`"));
-	}
-
-	if (count === 0) {
-		return str;
-	}
-
-	var regex = options.includeEmptyLines ? /^/mg : /^(?!\s*$)/mg;
-	return str.replace(regex, options.indent.repeat(count));
-};
-
 var PrintControls = function PrintControls(ref){
     if ( ref === void 0 ) ref = {};
     var description = ref.description; if ( description === void 0 ) description = '';
@@ -439,41 +394,13 @@ var PrintControls = function PrintControls(ref){
             console.log('1..'+plan);
         }
 
-        /*if(/^#/.test(description)){
-            const createDirective = (failed, result) =>{
-                result.failed = failed;
-                result.passed = !failed;
-                result.value = new Error('');
-                return result;
-            };
-            if(/^#[ ]TODO/.test(t.description)){
-                t = createDirective(true, t);
-            }else if(/^#[ ]PASS/.test(t.description)){
-                t = createDirective(false, t);
-            }
-        }*/
-
-
-
         var message = description.length ? description : '';
         var str = '';
         if(passed){
             str = 'ok ' + count + ' - ' + message;
-            /*if(value && value.message){
-                if(/#[ ]rethrow[ ]test/.test(value.message)){
-                    str += indent(value.message, 2);
-                }
-            }*/
         }else if(failed){
-            //console.log('subTest ',subTest)
-            if(subTest){
-                console.log(subTest);
-                var errMessage = '\n\n  ' + subTest.description + '\n';
-                errMessage += subTest.value.message;
-                return 'not ok ' + count + ' - ' + message + ' ' +  index$1(errMessage);
-            }
-            var errMessage$1 = value ? value.message : '';
-            str = 'not ok ' + count + ' - ' + message + ' ' + errMessage$1;
+            var errMessage = value ? value.message : '';
+            str = 'not ok ' + count + ' - ' + message + ' ' + errMessage;
         }
 
         if(count === plan){
