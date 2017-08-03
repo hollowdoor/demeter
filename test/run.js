@@ -62,7 +62,9 @@ test()
     t.assert(false);
     t.assert(true);
 })
-/*.reverse('test() assert 1 should fail', t=>{
+.test('.equal should pass', t=>t.equal(1, 1))
+.test('.equal should fail', t=>t.equal(1, 2))
+.reverse('test() assert 1 should fail', t=>{
     return test().test('assert should fail', t2=>{
         t2.assert(false);
     });
@@ -70,28 +72,25 @@ test()
 .reverse('test() rethrow should fail', t=>{
     return test().test('assert 2 should fail', t=>{
         t.assert(false);
-    }).run(null, {rethrow: true});
+    });
 })
 
 .test(t=>{
     t.assert(false);
 })
 .test('.fail', t=>t.fail())
-.test('.equal should pass', t=>t.equal(1, 1))
-.test('.equal should fail', t=>t.equal(1, 2))
+
 .test('promise should fail', t=>Promise.resolve().then(v=>t.fail()))
 .test('# TODO thing', t=>{})
 .test('# PASS passing', t=>{})
 .reverse('.equal fail reversed', t=>{
-    return thorny().test('', {rethrow:true}, t=>t.equal(1, 2))
-    .run();
+    return test().test('', t=>t.equal(1, 2));
 })
 .reverse('rethrow should fail', t=>{
-    return thorny().test('', {rethrow:true}, t=>t.fail())
-    .run();
+    return thorny().test('', t=>t.fail());
 })
 .reverse('promise should reject', t=>{
     return Promise.resolve().then(v=>t.reject('rejected'));
-})*/
+})
 .run()
 .catch(e=>console.log('all failed ', e));

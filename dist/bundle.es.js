@@ -18,12 +18,10 @@ var m = function (fn) { return function (message) {
 );
  }    };
 
-var bool = function (v, s) { return typeof v === 'boolean' ? v : v + s; };
-
 var showEqual = m(function (a, b) { return a + ' equal to ' + b; });
 var showNotEqual = m(function (a, b) { return a + ' not equal to ' + b; });
-var showTrue = m(function (a) { return bool(a, ' is truthy'); });
-var showFalse = m(function (a) { return bool(a, ' is falsy'); });
+var showTrue = m(function (a) { return a + ' is truthy'; });
+var showFalse = m(function (a) { return a + ' is falsy'; });
 
 function createAssertError(info, passed){
     if ( info === void 0 ) info = {};
@@ -468,7 +466,10 @@ Demeter.prototype.take = function take (){
 };
 Demeter.prototype.test = function test (description, callback){
 
-    //[description, options, callback] = getTestArgs(description, options, callback);
+    if(typeof callback === 'undefined'){
+        callback = description;
+        description = '';
+    }
 
     var test = new Test({
         description: description,
@@ -487,7 +488,10 @@ Demeter.prototype.test = function test (description, callback){
 };
 Demeter.prototype.reverse = function reverse (description, callback){
 
-    //[description, options, callback] = getTestArgs(description, options, callback);
+    if(typeof callback === 'undefined'){
+        callback = description;
+        description = '';
+    }
 
     var test = new Test({
         description: description,

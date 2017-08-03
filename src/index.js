@@ -45,7 +45,10 @@ export class Demeter {
     }
     test(description, callback){
 
-        //[description, options, callback] = getTestArgs(description, options, callback);
+        if(typeof callback === 'undefined'){
+            callback = description;
+            description = '';
+        }
 
         let test = new Test({
             description,
@@ -64,7 +67,10 @@ export class Demeter {
     }
     reverse(description, callback){
 
-        //[description, options, callback] = getTestArgs(description, options, callback);
+        if(typeof callback === 'undefined'){
+            callback = description;
+            description = '';
+        }
 
         let test = new Test({
             description,
