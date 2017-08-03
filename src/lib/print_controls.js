@@ -55,6 +55,7 @@ export default class PrintControls {
             }else if(failed){
                 //console.log('subTest ',subTest)
                 if(subTest){
+                    console.log(subTest);
                     let errMessage = '\n\n  ' + subTest.description + '\n';
                     errMessage += subTest.value.message
                     return 'not ok ' + count + ' - ' + message + ' ' +  indent(errMessage);
@@ -66,7 +67,7 @@ export default class PrintControls {
             if(count === plan){
                 setTimeout(()=>{
                     console.log('# done');
-                });                
+                });
             }
             return str;
         };

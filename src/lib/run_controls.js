@@ -9,7 +9,8 @@ export default class RunControls {
     } = {}){
 
         Object.defineProperties(this, {
-            count: {value: count}
+            count: {value: count},
+            plan: {value: plan}
         });
 
         this.getResult = function(value, passed){
@@ -36,23 +37,6 @@ export default class RunControls {
     resolve(callback, reverse = false){
         try{
             let value = callback(this.asserts());
-
-            /*if(typeof value === 'object'){
-                let run = value['resolve'];
-                if(typeof run === 'function'){
-                    return value
-                    .resolve()
-                    .then(sub=>{
-                        //console.log('sub ',sub)
-                        if(sub.failed){
-                            let result = this.fail();
-                            result.subTest = sub;
-                            return result;
-                        }
-                        return this.pass();
-                    });
-                }
-            }*/
 
             if(reverse){
                 return Promise.resolve(value)

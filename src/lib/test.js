@@ -15,13 +15,33 @@ export default class Test {
             time: {value: time || Date.now()}
         });
 
+        Object.defineProperty(this, 'resolve', {
+            value: function({
+                count = 1,
+                plan
+            } = {}){
+                let running = new RunControls({
+                    description,
+                    count,
+                    plan
+                });
+
+                return Promise.resolve(run(running))
+            }
+        });
+
         Object.defineProperty(this, 'run', {
             value: function({
                 count = 1,
                 plan
             } = {}){
 
-                let running = new RunControls({
+                return this.resolve({count, plan})
+                .then(result=>{
+                    return print(new PrintControls(result));
+                });
+
+                /*let running = new RunControls({
                     description,
                     count,
                     plan
@@ -30,7 +50,7 @@ export default class Test {
                 return Promise.resolve(run(running))
                 .then(result=>{
                     return print(new PrintControls(result));
-                });
+                });*/
             }
         });
     }

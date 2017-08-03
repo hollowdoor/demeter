@@ -164,7 +164,8 @@ var RunControls = function RunControls(ref){
 
 
     Object.defineProperties(this, {
-        count: {value: count}
+        count: {value: count},
+        plan: {value: plan}
     });
 
     this.getResult = function(value, passed){
@@ -195,22 +196,24 @@ RunControls.prototype.resolve = function resolve (callback, reverse){
     try{
         var value = callback(this.asserts());
 
-        /*if(typeof value === 'object'){
-            let run = value['resolve'];
+        if(typeof value === 'object'){
+            var run = value['resolve'];
+            console.log('value ',value);
+            console.log('run ',run);
             if(typeof run === 'function'){
                 return value
-                .resolve()
-                .then(sub=>{
+                .resolve(this)
+                .then(function (sub){
                     //console.log('sub ',sub)
                     if(sub.failed){
-                        let result = this.fail();
+                        var result = this$1.fail();
                         result.subTest = sub;
                         return result;
                     }
-                    return this.pass();
+                    return this$1.pass();
                 });
             }
-        }*/
+        }
 
         if(reverse){
             return Promise.resolve(value)
@@ -308,6 +311,7 @@ var PrintControls = function PrintControls(ref){
         }else if(failed){
             //console.log('subTest ',subTest)
             if(subTest){
+                console.log(subTest);
                 var errMessage = '\n\n  ' + subTest.description + '\n';
                 errMessage += subTest.value.message;
                 return 'not ok ' + count + ' - ' + message + ' ' +  indent(errMessage);
@@ -319,7 +323,7 @@ var PrintControls = function PrintControls(ref){
         if(count === plan){
             setTimeout(function (){
                 console.log('# done');
-            });                
+            });
         }
         return str;
     };
@@ -339,12 +343,11 @@ var Test = function Test(ref){
         time: {value: time || Date.now()}
     });
 
-    Object.defineProperty(this, 'run', {
+    Object.defineProperty(this, 'resolve', {
         value: function(ref){
             if ( ref === void 0 ) ref = {};
             var count = ref.count; if ( count === void 0 ) count = 1;
             var plan = ref.plan;
-
 
             var running = new RunControls({
                 description: description,
@@ -353,9 +356,31 @@ var Test = function Test(ref){
             });
 
             return Promise.resolve(run(running))
+        }
+    });
+
+    Object.defineProperty(this, 'run', {
+        value: function(ref){
+            if ( ref === void 0 ) ref = {};
+            var count = ref.count; if ( count === void 0 ) count = 1;
+            var plan = ref.plan;
+
+
+            return this.resolve({count: count, plan: plan})
             .then(function (result){
                 return print(new PrintControls(result));
             });
+
+            /*let running = new RunControls({
+                description,
+                count,
+                plan
+            });
+
+            return Promise.resolve(run(running))
+            .then(result=>{
+                return print(new PrintControls(result));
+            });*/
         }
     });
 };

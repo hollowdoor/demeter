@@ -85,7 +85,7 @@ test()
     return test().test('', t=>t.equal(1, 2));
 })
 .reverse('.fail should fail', t=>{
-    return thorny().test('', t=>t.fail());
+    return test().test('', t=>t.fail());
 })
 .reverse('promise should reject', t=>{
     return Promise.resolve().then(v=>t.reject('rejected'));
