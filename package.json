@@ -1,7 +1,7 @@
 {
   "name": "demeter",
   "version": "1.0.2",
-  "description": "A test framework",
+  "description": "A test library",
   "main": "dist/bundle.js",
   "scripts": {
     "test-run": "node test/run_all.js",
