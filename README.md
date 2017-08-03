@@ -12,7 +12,7 @@ Import from this module
 -----------------
 
 ```javascript
-import test from 'demeter';
+import { test } from 'demeter';
 ```
 
 Run a test
