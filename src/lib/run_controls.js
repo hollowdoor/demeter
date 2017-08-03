@@ -10,7 +10,8 @@ export default class RunControls {
 
         Object.defineProperties(this, {
             count: {value: count},
-            plan: {value: plan}
+            plan: {value: plan},
+            subTest: {value: subTest}
         });
 
         this.getResult = function(value, passed){

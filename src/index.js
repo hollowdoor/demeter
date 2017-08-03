@@ -14,14 +14,12 @@ export class Demeter {
     }
     run(){
 
-        let time = Date.now();
+        let time = this.startTime = Date.now();
 
         let pending = this.queue.reduce((p, t)=>{
             return p.then(v=>{
-                return t.run({
-                    count: ++this.count,
-                    plan: this.plan
-                });
+                ++this.count;
+                t.run(this);
             });
         }, Promise.resolve());
 
