@@ -1,37 +1,37 @@
 import RunControls from './run_controls.js';
 import PrintControls from './print_controls.js';
+import def from './def.js';
 
 export default class Test {
-    constructor({
+    constructor(tracker, {
         description = '',
         run = null,
-        print = null,
-        time = null,
-        plan = 1
+        print = null
     } = {}){
 
-        Object.defineProperties(this, {
-            description: {value: description},
-            time: {value: time || Date.now()}
+        def(this, {
+            description
         });
 
         Object.defineProperty(this, 'run', {
             value: function({
                 count = 1,
-                plan,
-                subTest
+                plan = 1
             } = {}){
 
-                let running = new RunControls({
+                Object.defineProperty(this, 'plan', {
+                    value: plan
+                });
+
+                let running = new RunControls(tracker, {
                     description,
                     count,
-                    plan,
-                    subTest
+                    plan
                 });
 
                 return Promise.resolve(run(running))
                 .then(result=>{
-                    return print(new PrintControls(result));
+                    return print(new PrintControls(tracker, result));
                 });
             }
         });

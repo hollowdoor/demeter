@@ -149,28 +149,30 @@ Assertions.prototype.deepEqual = function deepEqual$1 (object1, object2, message
     }
 };
 
-var RunControls = function RunControls(ref){
+var RunControls = function RunControls(tracker, ref){
     if ( ref === void 0 ) ref = {};
     var description = ref.description; if ( description === void 0 ) description = '';
     var count = ref.count; if ( count === void 0 ) count = 0;
     var plan = ref.plan; if ( plan === void 0 ) plan = 1;
-    var time = ref.time;
 
 
     Object.defineProperties(this, {
-        count: {value: count},
-        plan: {value: plan}
+        count: {value: count}
     });
 
     this.getResult = function(value, passed){
-
+        if(!!passed){
+            ++tracker.passed;
+        }else{
+            ++tracker.failed;
+        }
+            
         return {
             description: description,
             passed: !!passed,
             failed: !passed,
             value: value,
-            count: count,
-            plan: plan
+            count: count
         };
     };
 };
@@ -232,30 +234,55 @@ var writeVersion = (function (){
     };
 })();
 
-var PrintControls = function PrintControls(ref){
+function def(self, src){
+    for(var n in src){
+        if(src.hasOwnProperty(n)){
+            Object.defineProperty(self, n, {
+                value: src[n],
+                enumerable: true
+            });
+        }
+    }
+
+    return self;
+}
+
+var PrintControls = function PrintControls(tracker, ref){
     if ( ref === void 0 ) ref = {};
     var description = ref.description; if ( description === void 0 ) description = '';
     var passed = ref.passed; if ( passed === void 0 ) passed = true;
     var failed = ref.failed; if ( failed === void 0 ) failed = true;
     var value = ref.value; if ( value === void 0 ) value = '';
     var count = ref.count;
-    var plan = ref.plan; if ( plan === void 0 ) plan = 1;
-    var subTest = ref.subTest; if ( subTest === void 0 ) subTest = null;
 
 
-    Object.defineProperties(this, {
-        description: {value: description},
-        passed: {value: passed},
-        failed: {value: failed},
-        value: {value: value},
-        count: {value:count}
+    def(this, {
+        description: description,
+        passed: passed,
+        failed: failed,
+        value: value,
+        count: count
+    });
+
+    Object.defineProperty(this, 'startTime', {
+        get: function get(){
+            return tracker.startTime
+        }
+    });
+
+    Object.defineProperty(this, 'plan', {
+        get: function get(){
+            return tracker.plan
+        }
     });
 
     this.tap = function(){
+        var this$1 = this;
+
 
         if(count === 1){
             console.log('TAP version 13');
-            console.log('1..'+plan);
+            console.log('1..'+this.plan);
         }
 
         var message = description.length ? description : '';
@@ -267,67 +294,53 @@ var PrintControls = function PrintControls(ref){
             str = 'not ok ' + count + ' - ' + message + ' ' + errMessage;
         }
 
-        if(count === plan){
+        if(count === tracker.plan){
+
             setTimeout(function (){
-                console.log('# done');
+                if(!tracker.startTime) { return; }
+                console.log('# duration '+(Date.now()-this$1.startTime) + ' ms');
+                if(tracker.passed)
+                    { console.log('# passed '+tracker.passed); }
+                if(tracker.failed)
+                    { console.log('# failed '+tracker.failed); }
             });
         }
         return str;
     };
 };
 
-var Test = function Test(ref){
+var Test = function Test(tracker, ref){
     if ( ref === void 0 ) ref = {};
     var description = ref.description; if ( description === void 0 ) description = '';
     var run = ref.run; if ( run === void 0 ) run = null;
     var print = ref.print; if ( print === void 0 ) print = null;
-    var time = ref.time; if ( time === void 0 ) time = null;
-    var plan = ref.plan; if ( plan === void 0 ) plan = 1;
 
 
-    Object.defineProperties(this, {
-        description: {value: description},
-        time: {value: time || Date.now()}
-    });
-
-    Object.defineProperty(this, 'resolve', {
-        value: function(ref){
-            if ( ref === void 0 ) ref = {};
-            var count = ref.count; if ( count === void 0 ) count = 1;
-            var plan = ref.plan;
-
-            var running = new RunControls({
-                description: description,
-                count: count,
-                plan: plan
-            });
-
-            return Promise.resolve(run(running))
-        }
+    def(this, {
+        description: description
     });
 
     Object.defineProperty(this, 'run', {
         value: function(ref){
             if ( ref === void 0 ) ref = {};
             var count = ref.count; if ( count === void 0 ) count = 1;
-            var plan = ref.plan;
+            var plan = ref.plan; if ( plan === void 0 ) plan = 1;
 
 
-            return this.resolve({count: count, plan: plan})
-            .then(function (result){
-                return print(new PrintControls(result));
+            Object.defineProperty(this, 'plan', {
+                value: plan
             });
 
-            /*let running = new RunControls({
-                description,
-                count,
-                plan
+            var running = new RunControls(tracker, {
+                description: description,
+                count: count,
+                plan: plan
             });
 
             return Promise.resolve(run(running))
-            .then(result=>{
-                return print(new PrintControls(result));
-            });*/
+            .then(function (result){
+                return print(new PrintControls(tracker, result));
+            });
         }
     });
 };
@@ -397,8 +410,18 @@ FastReducableQueue.prototype.clear = function clear (){
 };
 
 var Demeter = function Demeter(){
-    var queue = this.queue = new FastReducableQueue();
+    var self = this,
+        queue = this.queue = new FastReducableQueue();
+
     this.count = 0;
+    this.passed = 0;
+    this.failed = 0;
+    //this.complete = false;
+    Object.defineProperty(this, 'complete', {
+        get: function get(){
+            return self.count === self.plan;
+        }
+    });
     Object.defineProperty(this, 'plan', {
         get: function get(){
             return queue.length;
@@ -409,20 +432,16 @@ Demeter.prototype.run = function run (){
         var this$1 = this;
 
 
-    var time = Date.now();
+    this.startTime = Date.now();
 
     var pending = this.queue.reduce(function (p, t){
         return p.then(function (v){
-            return t.run({
-                count: ++this$1.count,
-                plan: this$1.plan
-            });
+            ++this$1.count;
+            t.run(this$1);
         });
     }, Promise.resolve());
 
-    return pending.then(function (v){
-        console.log('# duration ' + (Date.now() - time) + 'ms');
-    });
+    return pending;
 };
 Demeter.prototype.take = function take (){
         var this$1 = this;
@@ -449,9 +468,9 @@ Demeter.prototype.test = function test (description, callback){
         description = '';
     }
 
-    var test = new Test({
+    var test = new Test(this, {
         description: description,
-        time: this.startTime,
+        startTime: this.startTime,
         print: function print(complete){
             var output = complete.tap();
             console.log(output);
@@ -471,9 +490,9 @@ Demeter.prototype.reverse = function reverse (description, callback){
         description = '';
     }
 
-    var test = new Test({
+    var test = new Test(this, {
         description: description,
-        time: this.startTime,
+        startTime: this.startTime,
         print: function print(complete){
             var output = complete.tap();
             console.log(output);

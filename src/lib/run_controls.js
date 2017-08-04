@@ -1,28 +1,29 @@
 import Assertions from './assertions.js';
 
 export default class RunControls {
-    constructor({
+    constructor(tracker, {
         description = '',
         count = 0,
-        plan = 1,
-        time
+        plan = 1
     } = {}){
 
         Object.defineProperties(this, {
-            count: {value: count},
-            plan: {value: plan},
-            subTest: {value: subTest}
+            count: {value: count}
         });
 
         this.getResult = function(value, passed){
-
+            if(!!passed){
+                ++tracker.passed;
+            }else{
+                ++tracker.failed;
+            }
+            
             return {
                 description,
                 passed: !!passed,
                 failed: !passed,
                 value,
-                count,
-                plan
+                count
             };
         };
     }

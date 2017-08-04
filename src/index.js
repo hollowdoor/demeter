@@ -4,8 +4,18 @@ import FastReducableQueue from './lib/fast_reducable_queue.js';
 
 export class Demeter {
     constructor(){
-        let queue = this.queue = new FastReducableQueue();
+        let self = this,
+            queue = this.queue = new FastReducableQueue();
+
         this.count = 0;
+        this.passed = 0;
+        this.failed = 0;
+        //this.complete = false;
+        Object.defineProperty(this, 'complete', {
+            get(){
+                return self.count === self.plan;
+            }
+        });
         Object.defineProperty(this, 'plan', {
             get(){
                 return queue.length;
@@ -14,7 +24,7 @@ export class Demeter {
     }
     run(){
 
-        let time = this.startTime = Date.now();
+        this.startTime = Date.now();
 
         let pending = this.queue.reduce((p, t)=>{
             return p.then(v=>{
@@ -23,9 +33,7 @@ export class Demeter {
             });
         }, Promise.resolve());
 
-        return pending.then(v=>{
-            console.log('# duration ' + (Date.now() - time) + 'ms');
-        });
+        return pending;
     }
     take(...holders){
 
@@ -48,9 +56,9 @@ export class Demeter {
             description = '';
         }
 
-        let test = new Test({
+        let test = new Test(this, {
             description,
-            time: this.startTime,
+            startTime: this.startTime,
             print(complete){
                 let output = complete.tap();
                 console.log(output);
@@ -70,9 +78,9 @@ export class Demeter {
             description = '';
         }
 
-        let test = new Test({
+        let test = new Test(this, {
             description,
-            time: this.startTime,
+            startTime: this.startTime,
             print(complete){
                 let output = complete.tap();
                 console.log(output);
