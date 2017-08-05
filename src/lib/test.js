@@ -3,7 +3,7 @@ import PrintControls from './print_controls.js';
 import def from './def.js';
 
 export default class Test {
-    constructor(tracker, {
+    constructor({
         description = '',
         run = null,
         print = null
@@ -13,20 +13,12 @@ export default class Test {
             description
         });
 
-        Object.defineProperty(this, 'run', {
-            value: function({
-                count = 1,
-                plan = 1
-            } = {}){
-
-                Object.defineProperty(this, 'plan', {
-                    value: plan
-                });
+        Object.defineProperty(this, 'runTest', {
+            value: function(tracker){
 
                 let running = new RunControls(tracker, {
                     description,
-                    count,
-                    plan
+                    count: tracker.count
                 });
 
                 return Promise.resolve(run(running))

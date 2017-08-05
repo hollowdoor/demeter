@@ -8,7 +8,7 @@ export default class RunControls {
     } = {}){
 
         Object.defineProperties(this, {
-            count: {value: count}
+            count: {value: count},
         });
 
         this.getResult = function(value, passed){
@@ -17,7 +17,7 @@ export default class RunControls {
             }else{
                 ++tracker.failed;
             }
-            
+
             return {
                 description,
                 passed: !!passed,

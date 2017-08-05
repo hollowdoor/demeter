@@ -5,7 +5,7 @@
   "main": "dist/bundle.js",
   "scripts": {
     "test-run": "node test/run_all.js",
-    "test": "npm run build && cd test && nyc node ./run.js",
+    "test": "npm run build && cd test && node ./run.js",
     "build": "ebam"
   },
   "ebam": {

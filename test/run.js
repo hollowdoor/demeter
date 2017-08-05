@@ -53,7 +53,7 @@ let t = test()
 })
 .reverse('acync promise test should fail', async t=>{
     await Promise.reject().catch(e=>t.reject());
-})
+});
 
 test()
 .take(t)

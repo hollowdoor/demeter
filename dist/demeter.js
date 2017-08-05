@@ -293,7 +293,7 @@ var RunControls = function RunControls(tracker, ref){
 
 
     Object.defineProperties(this, {
-        count: {value: count}
+        count: {value: count},
     });
 
     this.getResult = function(value, passed){
@@ -302,7 +302,7 @@ var RunControls = function RunControls(tracker, ref){
         }else{
             ++tracker.failed;
         }
-            
+
         return {
             description: description,
             passed: !!passed,
@@ -397,14 +397,15 @@ var PrintControls = function PrintControls(tracker, ref){
         passed: passed,
         failed: failed,
         value: value,
-        count: count
+        count: count,
+        tracker: tracker
     });
 
-    Object.defineProperty(this, 'startTime', {
-        get: function get(){
+    /*Object.defineProperty(this, 'startTime', {
+        get(){
             return tracker.startTime
         }
-    });
+    });*/
 
     Object.defineProperty(this, 'plan', {
         get: function get(){
@@ -412,40 +413,83 @@ var PrintControls = function PrintControls(tracker, ref){
         }
     });
 
-    this.tap = function(){
-        var this$1 = this;
-
+    /*this.tap = function(){
 
         if(count === 1){
             console.log('TAP version 13');
             console.log('1..'+this.plan);
         }
 
-        var message = description.length ? description : '';
-        var str = '';
+        let message = description.length ? description : '';
+        let str = '';
         if(passed){
             str = 'ok ' + count + ' - ' + message;
         }else if(failed){
-            var errMessage = value ? value.message : '';
+            let errMessage = value ? value.message : '';
             str = 'not ok ' + count + ' - ' + message + ' ' + errMessage;
         }
 
         if(count === tracker.plan){
 
-            setTimeout(function (){
-                if(!tracker.startTime) { return; }
-                console.log('# duration '+(Date.now()-this$1.startTime) + ' ms');
+            setTimeout(()=>{
+                if(!tracker.startTime) return;
+                console.log('# duration '+(Date.now()-this.startTime) + ' ms');
+                let end = '';
                 if(tracker.passed)
-                    { console.log('# passed '+tracker.passed); }
+                    end += '# passed '+tracker.passed;
                 if(tracker.failed)
-                    { console.log('# failed '+tracker.failed); }
+                    end += ' failed '+tracker.failed;
+                if(end.length){
+                    console.log(end);
+                }
             });
         }
         return str;
-    };
+    };*/
+};
+PrintControls.prototype.tap = function tap (){
+    var buffer = [];
+    if(this.count === 1){
+        buffer.push('TAP version 13');
+        buffer.push('1..'+this.plan);
+    }
+
+    var ref = this;
+        var description = ref.description;
+        var value = ref.value;
+        var count = ref.count;
+        var tracker = ref.tracker;
+
+    var message = description.length ? description : '';
+    var str = '';
+    if(this.passed){
+        str = 'ok ' + count + ' - ' + message;
+    }else if(this.failed){
+        var errMessage = value ? value.message : '';
+        str = 'not ok ' + count + ' - ' + message + ' ' + errMessage;
+    }
+
+    buffer.push(str);
+    //console.log('----------count', this.count);
+    //console.log('----------plan ', tracker.plan);
+    //console.log('----------tracker.queue.length',tracker.queue.length)
+
+    if(this.count === tracker.plan){
+        //let tracker = this.tracker;
+        buffer.push('# duration '+(Date.now()-tracker.startTime) + ' ms');
+        var end = '';
+        if(tracker.passed)
+            { end += '# passed '+tracker.passed; }
+        if(tracker.failed)
+            { end += ' failed '+tracker.failed; }
+        if(end.length){
+            buffer.push(end);
+        }
+    }
+    return buffer;
 };
 
-var Test = function Test(tracker, ref){
+var Test = function Test(ref){
     if ( ref === void 0 ) ref = {};
     var description = ref.description; if ( description === void 0 ) description = '';
     var run = ref.run; if ( run === void 0 ) run = null;
@@ -456,21 +500,12 @@ var Test = function Test(tracker, ref){
         description: description
     });
 
-    Object.defineProperty(this, 'run', {
-        value: function(ref){
-            if ( ref === void 0 ) ref = {};
-            var count = ref.count; if ( count === void 0 ) count = 1;
-            var plan = ref.plan; if ( plan === void 0 ) plan = 1;
-
-
-            Object.defineProperty(this, 'plan', {
-                value: plan
-            });
+    Object.defineProperty(this, 'runTest', {
+        value: function(tracker){
 
             var running = new RunControls(tracker, {
                 description: description,
-                count: count,
-                plan: plan
+                count: tracker.count
             });
 
             return Promise.resolve(run(running))
@@ -484,29 +519,22 @@ var Test = function Test(tracker, ref){
 var FastReducableQueue = function FastReducableQueue(){
     this.length = 0;
 };
-FastReducableQueue.prototype.take = function take (){
+FastReducableQueue.prototype.take = function take (queue){
         var this$1 = this;
-        var queues = [], len = arguments.length;
-        while ( len-- ) queues[ len ] = arguments[ len ];
 
-    for(var j=0; j<queues.length; j++){
-        for(var i=0; i<queues[j].length; i++){
-            this$1.push(queues[j][i]);
-        }
-        queues[j].clear();
+    for(var i=0, len=queue.length; i<len; i++){
+        this$1.push(queue[i]);
     }
+    queue.clear();
 };
 FastReducableQueue.prototype.push = function push (){
         var this$1 = this;
-        var values = [], len = arguments.length;
-        while ( len-- ) values[ len ] = arguments[ len ];
+        var values = [], len$1 = arguments.length;
+        while ( len$1-- ) values[ len$1 ] = arguments[ len$1 ];
 
-    if(this.length === 0){
-        for(var i=0; i<50; i++){ this$1[i] = {}; }
-    }
 
-    for(var i$1=0; i$1<values.length; i$1++){
-        this$1[this$1.length] = values[i$1];
+    for(var i=0, len=values.length; i<len; i++){
+        this$1[this$1.length] = values[i];
         ++this$1.length;
     }
 };
@@ -536,8 +564,8 @@ FastReducableQueue.prototype.reduce = function reduce (fn, startValue){
 FastReducableQueue.prototype.clear = function clear (){
         var this$1 = this;
 
-    var i = 0;
-    while(i < this.length){
+    var i = -1, len = this.length;
+    while(++i < len){
         try{
             delete this$1[i];
         }catch(e){}
@@ -546,21 +574,22 @@ FastReducableQueue.prototype.clear = function clear (){
 };
 
 var Demeter = function Demeter(){
-    var self = this,
-        queue = this.queue = new FastReducableQueue();
+    var self = this;
+    this.queue = new FastReducableQueue();
 
     this.count = 0;
     this.passed = 0;
     this.failed = 0;
-    //this.complete = false;
+
     Object.defineProperty(this, 'complete', {
         get: function get(){
             return self.count === self.plan;
         }
     });
+
     Object.defineProperty(this, 'plan', {
         get: function get(){
-            return queue.length;
+            return self.queue.length;
         }
     });
 };
@@ -568,12 +597,16 @@ Demeter.prototype.run = function run (){
         var this$1 = this;
 
 
+    //console.log('this ', this)
+
     this.startTime = Date.now();
+
+    //console.log('this.queue.length ',this.queue.length)
 
     var pending = this.queue.reduce(function (p, t){
         return p.then(function (v){
             ++this$1.count;
-            t.run(this$1);
+            return t.runTest(this$1);
         });
     }, Promise.resolve());
 
@@ -585,15 +618,19 @@ Demeter.prototype.take = function take (){
         while ( len-- ) holders[ len ] = arguments[ len ];
 
 
-    for(var j=0; j<holders.length; j++){
-        var queue = holders[j].queue;
-        var i = 0;
+    holders.forEach(function (h){
+        this$1.queue.take(h.queue);
+    });
+
+    /*for(let j=0; j<holders.length; j++){
+        let queue = holders[j].queue;
+        let i = 0;
         while(i < queue.length){
-            this$1.queue.push(queue[i]);
+            this.queue.push(queue[i]);
             ++i;
         }
         holders[j].queue = null;
-    }
+    }*/
 
     return this;
 };
@@ -604,12 +641,14 @@ Demeter.prototype.test = function test (description, callback){
         description = '';
     }
 
-    var test = new Test(this, {
+    var test = new Test({
         description: description,
-        startTime: this.startTime,
         print: function print(complete){
-            var output = complete.tap();
-            console.log(output);
+            //let output = complete.tap();
+            //console.log(output);
+            complete.tap().forEach(function (str){
+                console.log(str);
+            });
         },
         run: function run(controls){
             return controls.resolve(callback);
@@ -626,12 +665,14 @@ Demeter.prototype.reverse = function reverse (description, callback){
         description = '';
     }
 
-    var test = new Test(this, {
+    var test = new Test({
         description: description,
-        startTime: this.startTime,
         print: function print(complete){
-            var output = complete.tap();
-            console.log(output);
+            //let output = complete.tap();
+            //console.log(output);
+            complete.tap().forEach(function (str){
+                console.log(str);
+            });
         },
         run: function run(controls){
             return controls.reverse(callback);

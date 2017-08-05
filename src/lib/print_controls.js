@@ -16,14 +16,15 @@ export default class PrintControls {
             passed,
             failed,
             value,
-            count
+            count,
+            tracker
         });
 
-        Object.defineProperty(this, 'startTime', {
+        /*Object.defineProperty(this, 'startTime', {
             get(){
                 return tracker.startTime
             }
-        });
+        });*/
 
         Object.defineProperty(this, 'plan', {
             get(){
@@ -31,7 +32,7 @@ export default class PrintControls {
             }
         });
 
-        this.tap = function(){
+        /*this.tap = function(){
 
             if(count === 1){
                 console.log('TAP version 13');
@@ -52,13 +53,54 @@ export default class PrintControls {
                 setTimeout(()=>{
                     if(!tracker.startTime) return;
                     console.log('# duration '+(Date.now()-this.startTime) + ' ms');
+                    let end = '';
                     if(tracker.passed)
-                        console.log('# passed '+tracker.passed);
+                        end += '# passed '+tracker.passed;
                     if(tracker.failed)
-                        console.log('# failed '+tracker.failed);
+                        end += ' failed '+tracker.failed;
+                    if(end.length){
+                        console.log(end);
+                    }
                 });
             }
             return str;
-        };
+        };*/
+    }
+    tap(){
+        let buffer = [];
+        if(this.count === 1){
+            buffer.push('TAP version 13');
+            buffer.push('1..'+this.plan);
+        }
+
+        let { description, value, count, tracker } = this;
+
+        let message = description.length ? description : '';
+        let str = '';
+        if(this.passed){
+            str = 'ok ' + count + ' - ' + message;
+        }else if(this.failed){
+            let errMessage = value ? value.message : '';
+            str = 'not ok ' + count + ' - ' + message + ' ' + errMessage;
+        }
+
+        buffer.push(str);
+        //console.log('----------count', this.count);
+        //console.log('----------plan ', tracker.plan);
+        //console.log('----------tracker.queue.length',tracker.queue.length)
+
+        if(this.count === tracker.plan){
+            //let tracker = this.tracker;
+            buffer.push('# duration '+(Date.now()-tracker.startTime) + ' ms');
+            let end = '';
+            if(tracker.passed)
+                end += '# passed '+tracker.passed;
+            if(tracker.failed)
+                end += ' failed '+tracker.failed;
+            if(end.length){
+                buffer.push(end);
+            }
+        }
+        return buffer;
     }
 }
