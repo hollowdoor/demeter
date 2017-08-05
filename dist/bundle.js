@@ -102,9 +102,8 @@ Assertions.prototype.fail = function fail (message){
     }, false);
     throw err;
 };
-Assertions.prototype.equal = function equal (value1, value2, message, strict){
-    if(!isEqual(value1, value2, strict)){
-    //if(value1 !== value2){
+Assertions.prototype.equal = function equal (value1, value2, message){
+    if(!isEqual(value1, value2, true)){
         var err = createAssertError({
             message: showNotEqual(message, value1, value2),
             operator: 'equal',
@@ -115,12 +114,35 @@ Assertions.prototype.equal = function equal (value1, value2, message, strict){
         throw err;
     }
 };
-Assertions.prototype.notEqual = function notEqual (value1, value2, message, strict){
-    if(isEqual(value1, value2, strict)){
-    //if(value1 === value2){
+Assertions.prototype.equalish = function equalish (value1, value2, message){
+    if(!isEqual(value1, value2, false)){
+        var err = createAssertError({
+            message: showNotEqual(message, value1, value2),
+            operator: 'equalish',
+            expected: showEqual(null, value1, value2),
+            actual: showNotEqual(null, value1, value2)
+        }, false);
+
+        throw err;
+    }
+};
+Assertions.prototype.notEqual = function notEqual (value1, value2, message){
+    if(isEqual(value1, value2, true)){
         var err = createAssertError(message, {
             message: showEqual(message, value1, value2),
             operator: 'notEqual',
+            expected: showNotEqual(null, value1, value2),
+            actual: showEqual(null, value1, value2)
+        }, false);
+
+        throw err;
+    }
+};
+Assertions.prototype.notEqualish = function notEqualish (value1, value2, message){
+    if(isEqual(value1, value2, false)){
+        var err = createAssertError(message, {
+            message: showEqual(message, value1, value2),
+            operator: 'notEqualish',
             expected: showNotEqual(null, value1, value2),
             actual: showEqual(null, value1, value2)
         }, false);
@@ -139,13 +161,23 @@ Assertions.prototype.reject = function reject (message){
     }, false);
     return Promise.reject(err);
 };
-Assertions.prototype.deepEqual = function deepEqual$1 (object1, object2, message, strict){
-        if ( strict === void 0 ) strict = true;
-
-    if(!deepEqual(object1, object2, {strict: strict})){
+Assertions.prototype.deepEqual = function deepEqual$1 (object1, object2, message){
+    if(!deepEqual(object1, object2, {strict:true})){
         var err = createAssertError({
             message: showNotEqual(message, object1, object2),
             operator: 'deepEqual',
+            expected: showEqual(null, object1, object2),
+            actual: showNotEqual(null, object1, object2)
+        }, false);
+
+        throw err;
+    }
+};
+Assertions.prototype.deepEqualish = function deepEqualish (object1, object2, message){
+    if(!deepEqual(object1, object2, {strict:false})){
+        var err = createAssertError({
+            message: showNotEqual(message, object1, object2),
+            operator: 'deepEqualish',
             expected: showEqual(null, object1, object2),
             actual: showNotEqual(null, object1, object2)
         }, false);
