@@ -25,11 +25,7 @@ export class Demeter {
     }
     run(){
 
-        //console.log('this ', this)
-
         this.startTime = Date.now();
-
-        //console.log('this.queue.length ',this.queue.length)
 
         let pending = this.queue.reduce((p, t)=>{
             return p.then(v=>{
@@ -46,16 +42,6 @@ export class Demeter {
             this.queue.take(h.queue);
         });
 
-        /*for(let j=0; j<holders.length; j++){
-            let queue = holders[j].queue;
-            let i = 0;
-            while(i < queue.length){
-                this.queue.push(queue[i]);
-                ++i;
-            }
-            holders[j].queue = null;
-        }*/
-
         return this;
     }
     test(description, callback){
@@ -68,8 +54,6 @@ export class Demeter {
         let test = new Test({
             description,
             print(complete){
-                //let output = complete.tap();
-                //console.log(output);
                 complete.tap().forEach(str=>{
                     console.log(str);
                 });
@@ -92,8 +76,6 @@ export class Demeter {
         let test = new Test({
             description,
             print(complete){
-                //let output = complete.tap();
-                //console.log(output);
                 complete.tap().forEach(str=>{
                     console.log(str);
                 });
