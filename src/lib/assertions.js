@@ -71,9 +71,8 @@ export default class Assertions {
         }, false);
         throw err;
     }
-    equal(value1, value2, message, strict){
-        if(!isEqual(value1, value2, strict)){
-        //if(value1 !== value2){
+    equal(value1, value2, message){
+        if(!isEqual(value1, value2, true)){
             let err = createAssertError({
                 message: m.showNotEqual(message, value1, value2),
                 operator: 'equal',
@@ -84,12 +83,35 @@ export default class Assertions {
             throw err;
         }
     }
-    notEqual(value1, value2, message, strict){
-        if(isEqual(value1, value2, strict)){
-        //if(value1 === value2){
+    equalish(value1, value2, message){
+        if(!isEqual(value1, value2, false)){
+            let err = createAssertError({
+                message: m.showNotEqual(message, value1, value2),
+                operator: 'equalish',
+                expected: m.showEqual(null, value1, value2),
+                actual: m.showNotEqual(null, value1, value2)
+            }, false);
+
+            throw err;
+        }
+    }
+    notEqual(value1, value2, message){
+        if(isEqual(value1, value2, true)){
             let err = createAssertError(message, {
                 message: m.showEqual(message, value1, value2),
                 operator: 'notEqual',
+                expected: m.showNotEqual(null, value1, value2),
+                actual: m.showEqual(null, value1, value2)
+            }, false);
+
+            throw err;
+        }
+    }
+    notEqualish(value1, value2, message){
+        if(isEqual(value1, value2, false)){
+            let err = createAssertError(message, {
+                message: m.showEqual(message, value1, value2),
+                operator: 'notEqualish',
                 expected: m.showNotEqual(null, value1, value2),
                 actual: m.showEqual(null, value1, value2)
             }, false);
@@ -106,11 +128,23 @@ export default class Assertions {
         }, false);
         return Promise.reject(err);
     }
-    deepEqual(object1, object2, message, strict = true){
-        if(!deepEqual(object1, object2, {strict})){
+    deepEqual(object1, object2, message){
+        if(!deepEqual(object1, object2, {strict:true})){
             let err = createAssertError({
                 message: m.showNotEqual(message, object1, object2),
                 operator: 'deepEqual',
+                expected: m.showEqual(null, object1, object2),
+                actual: m.showNotEqual(null, object1, object2)
+            }, false);
+
+            throw err;
+        }
+    }
+    deepEqualish(object1, object2, message){
+        if(!deepEqual(object1, object2, {strict:false})){
+            let err = createAssertError({
+                message: m.showNotEqual(message, object1, object2),
+                operator: 'deepEqualish',
                 expected: m.showEqual(null, object1, object2),
                 actual: m.showNotEqual(null, object1, object2)
             }, false);
