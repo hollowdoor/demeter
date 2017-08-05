@@ -1,5 +1,3 @@
-import writeVersion from './write_version.js';
-import indent from 'indent-string';
 import def from './def.js';
 
 export default class PrintControls {

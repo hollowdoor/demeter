@@ -5,7 +5,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var deepEqual = _interopDefault(require('deep-equal'));
-var indentString = _interopDefault(require('indent-string'));
 
 var str = function (a) { return (
     typeof a === 'object'
@@ -216,30 +215,6 @@ RunControls.prototype.reverse = function reverse (callback){
     return this.resolve(callback, true);
 };
 
-var writeVersion = (function (){
-    var g;
-    var TAP_VERSION_WRITTEN = false;
-    if(typeof global === 'undefined'){
-        g = window;
-    }else{
-        g = global;
-    }
-
-    if(typeof g['TAP_VERSION_WRITTEN'] === 'undefined'){
-        Object.defineProperty(g, 'TAP_VERSION_WRITTEN', {
-            get: function get(){
-                return TAP_VERSION_WRITTEN;
-            }
-        });
-    }
-
-    return function (){
-        if(g.TAP_VERSION_WRITTEN) { return; }
-        console.log('TAP version 13');
-        TAP_VERSION_WRITTEN = true;
-    };
-})();
-
 function def(self, src){
     for(var n in src){
         if(src.hasOwnProperty(n)){
@@ -271,51 +246,11 @@ var PrintControls = function PrintControls(tracker, ref){
         tracker: tracker
     });
 
-    /*Object.defineProperty(this, 'startTime', {
-        get(){
-            return tracker.startTime
-        }
-    });*/
-
     Object.defineProperty(this, 'plan', {
         get: function get(){
             return tracker.plan
         }
     });
-
-    /*this.tap = function(){
-
-        if(count === 1){
-            console.log('TAP version 13');
-            console.log('1..'+this.plan);
-        }
-
-        let message = description.length ? description : '';
-        let str = '';
-        if(passed){
-            str = 'ok ' + count + ' - ' + message;
-        }else if(failed){
-            let errMessage = value ? value.message : '';
-            str = 'not ok ' + count + ' - ' + message + ' ' + errMessage;
-        }
-
-        if(count === tracker.plan){
-
-            setTimeout(()=>{
-                if(!tracker.startTime) return;
-                console.log('# duration '+(Date.now()-this.startTime) + ' ms');
-                let end = '';
-                if(tracker.passed)
-                    end += '# passed '+tracker.passed;
-                if(tracker.failed)
-                    end += ' failed '+tracker.failed;
-                if(end.length){
-                    console.log(end);
-                }
-            });
-        }
-        return str;
-    };*/
 };
 PrintControls.prototype.tap = function tap (){
     var buffer = [];
@@ -340,12 +275,8 @@ PrintControls.prototype.tap = function tap (){
     }
 
     buffer.push(str);
-    //console.log('----------count', this.count);
-    //console.log('----------plan ', tracker.plan);
-    //console.log('----------tracker.queue.length',tracker.queue.length)
 
     if(this.count === tracker.plan){
-        //let tracker = this.tracker;
         buffer.push('# duration '+(Date.now()-tracker.startTime) + ' ms');
         var end = '';
         if(tracker.passed)
@@ -467,11 +398,7 @@ Demeter.prototype.run = function run (){
         var this$1 = this;
 
 
-    //console.log('this ', this)
-
     this.startTime = Date.now();
-
-    //console.log('this.queue.length ',this.queue.length)
 
     var pending = this.queue.reduce(function (p, t){
         return p.then(function (v){
@@ -492,16 +419,6 @@ Demeter.prototype.take = function take (){
         this$1.queue.take(h.queue);
     });
 
-    /*for(let j=0; j<holders.length; j++){
-        let queue = holders[j].queue;
-        let i = 0;
-        while(i < queue.length){
-            this.queue.push(queue[i]);
-            ++i;
-        }
-        holders[j].queue = null;
-    }*/
-
     return this;
 };
 Demeter.prototype.test = function test (description, callback){
@@ -514,8 +431,6 @@ Demeter.prototype.test = function test (description, callback){
     var test = new Test({
         description: description,
         print: function print(complete){
-            //let output = complete.tap();
-            //console.log(output);
             complete.tap().forEach(function (str){
                 console.log(str);
             });
@@ -538,8 +453,6 @@ Demeter.prototype.reverse = function reverse (description, callback){
     var test = new Test({
         description: description,
         print: function print(complete){
-            //let output = complete.tap();
-            //console.log(output);
             complete.tap().forEach(function (str){
                 console.log(str);
             });
